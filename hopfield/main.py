@@ -1,6 +1,7 @@
 import numpy as np
 import random
 
+arr = np.genfromtxt('plus.txt')
 # step0 initialize weight using heb rules
 x = np.array([1, -1, -1, -1, 1,
               -1, 1, -1, 1, -1,
@@ -22,12 +23,15 @@ deltaW = np.add(deltaW, np.matmul(o.T, o))
 deltaW = np.add(deltaW, np.matmul(plus.T, plus))
 for i in range(25):
     deltaW[i, i] = 0
-
-
+    arr[i, i] = 0
+if (deltaW==arr).all():
+    print("ok")
+else:
+    print("NOK")
 # step 1 to 6 using of hopfield
 def hopfielduse(inputkar):
     # step1 and step2
-    y = inputkar
+    y = list(inputkar)
     # step3
     # randomize the unit orders
     r = list(range(25))
@@ -37,8 +41,7 @@ def hopfielduse(inputkar):
         # step4
         sigma = 0
         for j in range(25):
-            if j != i:
-                sigma += y[j] * deltaW[j][i]
+            sigma += y[j] * deltaW[j][i]
         yin = inputkar[i] + sigma
         # step5
         if yin > 0:
@@ -52,21 +55,19 @@ def hopfielduse(inputkar):
 flag = True
 epoch = 0
 inputuser = [0, 0, 1, 0, 0,
-             0, 0, 1, 0, 0,
-             0, 0, 0, 0, 1,
-             0, 0, 0, 0, 0,
-             0, 0, 1, 0, 0]
-inputtemp = inputuser
+             1, 0, 0, 0, 0,
+             1, 0, 0, 0, 1,
+             1, 0, 0, 0, 0,
+             0, 0, 0, 0, 0]
+inputtemp = list(inputuser)
 inputView = np.reshape(np.asarray(inputuser), (-1, 5))
 res = []
 while flag:
     epoch = 1 + epoch
-    res = hopfielduse(inputtemp)
-    print(res)
+    res = hopfielduse(inputuser)
     if res == inputtemp:
         flag = False
     else:
-        inputtemp = res
-    print(epoch)
+        inputtemp = list(res)
 
 resView = np.reshape(res, (-1, 5))
