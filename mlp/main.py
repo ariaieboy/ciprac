@@ -1,7 +1,11 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import random
 
 # learning_rate
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+
 learning_rate = 0.7
 
 # import samples
@@ -25,6 +29,7 @@ def fp(x):
 
 
 def use(w, v, samples):
+    result = []
     count_errors = 0
     # step 0 , 1 ,2
     for x in samples:
@@ -43,8 +48,36 @@ def use(w, v, samples):
             sigma += z[i] * w[ind]
         y = f(w[0] + sigma)
         if round(y) != x[2]:
+            result.append([x[0], x[1], x[2], 0])
             count_errors += 1
+        else:
+            result.append([x[0], x[1], x[2], 1])
     return count_errors
+
+
+def useforplot(w, v, samples):
+    result = []
+    # step 0 , 1 ,2
+    for x in samples:
+        # step 3
+        z = []
+        for i in range(4):
+            sigma = 0
+            for j in range(2):
+                ind = ((j + 1) * 4) + i
+                sigma += x[j] * v[ind]
+            z_in_j = v[i] + sigma
+            z.append(f(z_in_j))
+        sigma = 0
+        for i in range(4):
+            ind = i + 1
+            sigma += z[i] * w[ind]
+        y = f(w[0] + sigma)
+        if round(y) != x[2]:
+            result.append([x[0], x[1], x[2], 0])
+        else:
+            result.append([x[0], x[1], x[2], 1])
+    return result
 
 
 # function for checj stop condition
@@ -128,3 +161,20 @@ while not stop_condition:
         for i in range(12):
             v[i] += delta_v[i]
     stop_condition = check_stop_condition(list(w), list(v), test)
+
+
+def showplot():
+    training = useforplot(list(w), list(v), train)
+    tests = useforplot(list(w), list(v), test)
+    shapes = ['o', 'x']
+    colors = ['r', 'b']
+    shapestest = ["P", "p"]
+    plt.axis([-10, 10, -10, 10])
+    for i in training:
+        plt.scatter(i[0], i[1], marker=shapes[int(i[2])], color=colors[i[3]], label="training")
+    for i in tests:
+        plt.scatter(i[0], i[1], marker=shapestest[int(i[2])], color=colors[i[3]], label="test")
+    plt.show()
+
+
+showplot()
