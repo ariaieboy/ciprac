@@ -10,7 +10,7 @@ split = 70
 train, test = data[:split, :], data[split:, :]
 prev_w = []
 prev_v = []
-prev_errors = []
+prev_errors = [100]
 
 
 # function for calc f
@@ -42,7 +42,7 @@ def use(w, v, samples):
             ind = i + 1
             sigma += z[i] * w[ind]
         y = f(w[0] + sigma)
-        if y != x[2]:
+        if round(y) != x[2]:
             count_errors += 1
     return count_errors
 
@@ -50,19 +50,23 @@ def use(w, v, samples):
 # function for checj stop condition
 def check_stop_condition(currentW, currentV, tests):
     current_errors_count = use(currentW, currentV, tests)
-    prev_v.append(currentV)
-    prev_w.append(currentW)
-    prev_errors.append(current_errors_count)
-    prev_errors_count = len(prev_errors)
-    print(prev_errors)
-    if prev_errors_count > 5:
-        prev_errors.pop(0)
-        prev_v.pop(0)
-        prev_w.pop(0)
-    for i in range(prev_errors_count - 1):
-        if prev_errors[i] > prev_errors[i + 1]:
-            return False
+    # prev_v.append(currentV)
+    # prev_w.append(currentW)
+    # prev_errors.append(current_errors_count)
+    # prev_errors_count = len(prev_errors)
+    print("current")
+    print(current_errors_count)
+    print("previus")
+    print(prev_errors[0])
+    # if prev_errors_count > 5:
+    #   prev_errors.pop(0)
+    #  prev_v.pop(0)
+    # prev_w.pop(0)
+    # for i in range(prev_errors_count - 1):
+    if prev_errors[0] >= current_errors_count:
+        prev_errors[0] = current_errors_count
         return False
+    return True
 
 
 # main section of the program
