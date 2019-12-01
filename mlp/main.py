@@ -69,7 +69,7 @@ while not stop_condition:
         sigma = 0
         for i in range(4):
             index = i + 1
-            sigma += x[i] * w[index]
+            sigma += z[i] * w[index]
         yin = sigma + w[j]
         y = f(yin)
         ############### step 6  ##############
@@ -81,19 +81,20 @@ while not stop_condition:
         ###############  step 7  ###############
         delta_in_j = []
         for i in range(4):
-            delta_in_j[i] = delta_k * w[i + 1]
+            temp = delta_k * w[i + 1]
+            delta_in_j.append(temp)
         delta_j = []
-        for i in range(4):
-            delta_j[i] = delta_in_j[i] * fp(zin[j])
-
-        delta_v = []
+        for j in range(4):
+            temp = delta_in_j[j] * fp(z[j])
+            delta_j.append(temp)
+        delta_v = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         for i in range(4):
             delta_v[i] = learning_rate * delta_j[i]
             delta_v[i + 4] = learning_rate * delta_j[i] * x[0]
             delta_v[i + 8] = learning_rate * delta_j[i] * x[1]
         # step 8
         for i in range(5):
-            w[i] += deltaW
+            w[i] += deltaW[i]
         for i in range(12):
             v[i] += delta_v[i]
     stop_condition = check_stop_condition(w[:], v[:], test)
