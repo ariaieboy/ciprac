@@ -6,7 +6,7 @@ learning_rate = 0.7
 
 # import samples
 data = np.genfromtxt('mlp.txt')
-split = round(data.size * 0.7)
+split = 70
 train, test = data[:split, :], data[split:, :]
 prev_w = []
 prev_v = []
@@ -24,20 +24,44 @@ def fp(x):
     return r * (1 - r)
 
 
+def use(w, v, samples):
+    count_errors = 0
+    # step 0 , 1 ,2
+    for x in samples:
+        # step 3
+        z = []
+        for i in range(4):
+            sigma = 0
+            for j in range(2):
+                ind = ((j + 1) * 4) + i
+                sigma += x[j] * v[ind]
+            z_in_j = v[i] + sigma
+            z.append(f(z_in_j))
+        sigma = 0
+        for i in range(4):
+            ind = i + 1
+            sigma += z[i] * w[ind]
+        y = f(w[0] + sigma)
+        if y != x[2]:
+            count_errors += 1
+    return count_errors
+
+
 # function for checj stop condition
 def check_stop_condition(currentW, currentV, tests):
-    current_errors_count = use(currentV, currentW, tests)
+    current_errors_count = use(currentW, currentV, tests)
     prev_v.append(currentV)
     prev_w.append(currentW)
     prev_errors.append(current_errors_count)
     prev_errors_count = len(prev_errors)
+    print(prev_errors)
     if prev_errors_count > 5:
         prev_errors.pop(0)
         prev_v.pop(0)
         prev_w.pop(0)
     for i in range(prev_errors_count - 1):
-        if prev_errors[i] < prev_errors[i + 1]:
-            return True
+        if prev_errors[i] > prev_errors[i + 1]:
+            return False
         return False
 
 
@@ -57,6 +81,7 @@ while not stop_condition:
     for x in train:
         # step 3
         z = []
+        z_in = []
         for j in range(4):
             # step 4
             sigma = 0
@@ -65,12 +90,13 @@ while not stop_condition:
                 sigma += x[i] * v[index]
             zin = sigma + v[j]
             z.append(f(zin))
+            z_in.append(zin)
         ###############  step 5  ##############
         sigma = 0
         for i in range(4):
             index = i + 1
             sigma += z[i] * w[index]
-        yin = sigma + w[j]
+        yin = sigma + w[0]
         y = f(yin)
         ############### step 6  ##############
         delta_k = (x[2] - y) * fp(yin)
@@ -85,9 +111,9 @@ while not stop_condition:
             delta_in_j.append(temp)
         delta_j = []
         for j in range(4):
-            temp = delta_in_j[j] * fp(z[j])
+            temp = delta_in_j[j] * fp(z_in[j])
             delta_j.append(temp)
-        delta_v = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        delta_v = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for i in range(4):
             delta_v[i] = learning_rate * delta_j[i]
             delta_v[i + 4] = learning_rate * delta_j[i] * x[0]
@@ -97,27 +123,4 @@ while not stop_condition:
             w[i] += deltaW[i]
         for i in range(12):
             v[i] += delta_v[i]
-    stop_condition = check_stop_condition(w[:], v[:], test)
-
-
-def use(w, v, samples):
-    count_errors = 0
-    # step 0 , 1 ,2
-    for x in samples:
-        # step 3
-        z = []
-        for i in range(4):
-            sigma = 0
-            for j in range(2):
-                index = (j + 1) * 4 + i
-                sigma += x[j] * v[index]
-            z_in_j = v[i] + sigma
-            z.append(f(z_in_j))
-        sigma = 0
-        for i in range(4):
-            index = i + 1
-            sigma += z[i] * w[index]
-        y = f(w[0] + sigma)
-        if y != x[2]:
-            count_errors += 1
-    return count_errors
+    stop_condition = check_stop_condition(list(w), list(v), test)
