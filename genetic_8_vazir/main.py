@@ -1,4 +1,7 @@
 import random
+import operator
+
+prep = 5
 
 
 class Animal:
@@ -66,9 +69,9 @@ def crossover(selected):
         for j in range(8):
             if j <= split:
                 genotype1.append(selected[i].genotype[j])
-                genotype2.append(selected[i+1].genotype[j])
+                genotype2.append(selected[i + 1].genotype[j])
             else:
-                genotype1.append(selected[i+1].genotype[j])
+                genotype1.append(selected[i + 1].genotype[j])
                 genotype2.append(selected[i].genotype[j])
         childs.append(Animal(genotype1))
         childs.append(Animal(genotype2))
@@ -83,7 +86,7 @@ def Mutation(childs):
         childs[select].genotype[genotypeindex] = randint
 
 
-def replacement(parents, children):
+def generational_replacement(parents, children):
     maximum1 = 0
     maximum2 = 0
     for i in range(1, 49):
@@ -97,9 +100,53 @@ def replacement(parents, children):
     return children
 
 
+def steady_selection(animals):
+    sum = 0
+    chanses = []
+    is_selected = [0] * 50
+    selected = []
+    for animal in animals:
+        sum += animal.fit
+    chanses.append(round(animals[0].fit / sum, 4))
+    for i in range(1, 50):
+        chanses.append(round(animal.fit / sum + chanses[i - 1], 4))
+    counter = 0
+    while counter != prep:
+        randomnumber = round(random.uniform(0, 1), 5)
+        for j in range(50):
+            if chanses[j] >= randomnumber:
+                if j == 0:
+                    if is_selected[j == 0]:
+                        selected.append(animals[j])
+                        is_selected[j] = 1
+                        counter += 1
+                else:
+                    if (j - 1) != 5:
+                        selected.append(animals[j - 1])
+                        is_selected[j - 1] = 1
+                        counter += 1
+                break
+            elif 49 == j and is_selected[j] != 5:
+                selected.append(animals[j])
+                is_selected[j] = 1
+                counter += 1
+    return selected
+
+
+def steady_replacement(parents, children):
+    parents.sort(key=operator.attrgetter('fit'))
+    del parents[:prep]
+    selectedchilds = steady_selection(children)
+    for select in selectedchilds:
+        parents.append(select)
+    return parents
+
+
 def stop_condition(parents):
     for parent in parents:
         if 28 == parent.fit:
+            print(parent.genotype)
+            print(parent.fit)
             return False
     return True
 
@@ -116,7 +163,9 @@ def maingenetic():
         Mutation(childs)
         for i in childs:
             fitness(i)
-        parents = replacement(parents, childs)
+        parents = steady_replacement(parents, childs)
+    print("generation created")
+    print(counter)
 
 
 maingenetic()
