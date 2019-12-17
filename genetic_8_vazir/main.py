@@ -51,17 +51,18 @@ def selection(animals):
                 else:
                     selected.append(animals[j - 1])
                 break
-    return random.shuffle(selected)
+    random.shuffle(selected)
+    return selected
 
 
 def crossover(selected):
     childs = []
-    for i in range(0, 50, 2):
+    for i in range(0, 49, 2):
         split = random.randint(1, 6)
         genotype1 = selected[i].genotype[0:split]
-        genotype1.append(selected[i + 1].genotype[split + 1:7])
+        genotype1.append(selected[i + 1].genotype[(split + 1):7])
         genotype2 = selected[i + 1].genotype[0:split]
-        genotype2.append(selected[i].genotype[split + 1:7])
+        genotype2.append(selected[i].genotype[(split + 1):7])
         childs.append(Animal(genotype1))
         childs.append(Animal(genotype2))
     return childs
@@ -69,8 +70,24 @@ def crossover(selected):
 
 def Mutation(childs):
     for i in range(2):
-        select = random.randint(0, 49)
-        childs[select].genotype[random.randint(0, 7)] = random.randint(0, 7)
+        select = random.randint(0, len(childs)-1)
+        genotypeindex = random.randint(0,7)
+        randint = random.randint(0,7)
+        childs[select].genotype[genotypeindex] = randint
+
+
+def replacement(parents, children):
+    maximum1 = 0
+    maximum2 = 0
+    for i in range(1, 49):
+        if parents[maximum1].fit < parents[i].fit:
+            if parents[maximum2].fit<parents[i].fit:
+                maximum2 = i
+            else:
+                maximum1 = i
+    children.append(parents[maximum1])
+    children.append(parents[maximum2])
+    return children
 
 
 def stop_condition(parents):
@@ -84,13 +101,23 @@ def maingenetic():
     parents = initial()
     for i in range(50):
         fitness(parents[i])
+    counter = 0
     while stop_condition(parents):
+        counter += 1
+        print("counter")
+        print(counter)
+        print("parents")
+        print(len(parents))
         selected = selection(parents)
+        print("selected")
+        print(len(selected))
         childs = crossover(selected)
+        print("childs")
+        print(len(childs))
         Mutation(childs)
-        for i in range(50):
-            fitness(childs)
-        parents = childs
+        for i in childs:
+            fitness(i)
+        parents = replacement(parents, childs)
 
 
 maingenetic()
