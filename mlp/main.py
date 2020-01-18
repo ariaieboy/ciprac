@@ -1,16 +1,20 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import random
 
 # learning_rate
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+
 learning_rate = 0.7
 
 # import samples
 data = np.genfromtxt('mlp.txt')
-split = round(data.size * 0.7)
+split = 70
 train, test = data[:split, :], data[split:, :]
 prev_w = []
 prev_v = []
-prev_errors = []
+prev_errors = [100]
 
 
 # function for calc f
@@ -24,21 +28,78 @@ def fp(x):
     return r * (1 - r)
 
 
+def use(w, v, samples):
+    result = []
+    count_errors = 0
+    # step 0 , 1 ,2
+    for x in samples:
+        # step 3
+        z = []
+        for i in range(4):
+            sigma = 0
+            for j in range(2):
+                ind = ((j + 1) * 4) + i
+                sigma += x[j] * v[ind]
+            z_in_j = v[i] + sigma
+            z.append(f(z_in_j))
+        sigma = 0
+        for i in range(4):
+            ind = i + 1
+            sigma += z[i] * w[ind]
+        y = f(w[0] + sigma)
+        if round(y) != x[2]:
+            result.append([x[0], x[1], x[2], 0])
+            count_errors += 1
+        else:
+            result.append([x[0], x[1], x[2], 1])
+    return count_errors
+
+
+def useforplot(w, v, samples):
+    result = []
+    # step 0 , 1 ,2
+    for x in samples:
+        # step 3
+        z = []
+        for i in range(4):
+            sigma = 0
+            for j in range(2):
+                ind = ((j + 1) * 4) + i
+                sigma += x[j] * v[ind]
+            z_in_j = v[i] + sigma
+            z.append(f(z_in_j))
+        sigma = 0
+        for i in range(4):
+            ind = i + 1
+            sigma += z[i] * w[ind]
+        y = f(w[0] + sigma)
+        if round(y) != x[2]:
+            result.append([x[0], x[1], x[2], 0])
+        else:
+            result.append([x[0], x[1], x[2], 1])
+    return result
+
+
 # function for checj stop condition
 def check_stop_condition(currentW, currentV, tests):
-    current_errors_count = use(currentV, currentW, tests)
-    prev_v.append(currentV)
-    prev_w.append(currentW)
-    prev_errors.append(current_errors_count)
-    prev_errors_count = len(prev_errors)
-    if prev_errors_count > 5:
-        prev_errors.pop(0)
-        prev_v.pop(0)
-        prev_w.pop(0)
-    for i in range(prev_errors_count - 1):
-        if prev_errors[i] < prev_errors[i + 1]:
-            return True
+    current_errors_count = use(currentW, currentV, tests)
+    # prev_v.append(currentV)
+    # prev_w.append(currentW)
+    # prev_errors.append(current_errors_count)
+    # prev_errors_count = len(prev_errors)
+    print("current")
+    print(current_errors_count)
+    print("previus")
+    print(prev_errors[0])
+    # if prev_errors_count > 5:
+    #   prev_errors.pop(0)
+    #  prev_v.pop(0)
+    # prev_w.pop(0)
+    # for i in range(prev_errors_count - 1):
+    if prev_errors[0] >= current_errors_count:
+        prev_errors[0] = current_errors_count
         return False
+    return True
 
 
 # main section of the program
@@ -57,6 +118,7 @@ while not stop_condition:
     for x in train:
         # step 3
         z = []
+        z_in = []
         for j in range(4):
             # step 4
             sigma = 0
@@ -65,12 +127,13 @@ while not stop_condition:
                 sigma += x[i] * v[index]
             zin = sigma + v[j]
             z.append(f(zin))
+            z_in.append(zin)
         ###############  step 5  ##############
         sigma = 0
         for i in range(4):
             index = i + 1
-            sigma += x[i] * w[index]
-        yin = sigma + w[j]
+            sigma += z[i] * w[index]
+        yin = sigma + w[0]
         y = f(yin)
         ############### step 6  ##############
         delta_k = (x[2] - y) * fp(yin)
@@ -81,42 +144,37 @@ while not stop_condition:
         ###############  step 7  ###############
         delta_in_j = []
         for i in range(4):
-            delta_in_j[i] = delta_k * w[i + 1]
+            temp = delta_k * w[i + 1]
+            delta_in_j.append(temp)
         delta_j = []
-        for i in range(4):
-            delta_j[i] = delta_in_j[i] * fp(zin[j])
-
-        delta_v = []
+        for j in range(4):
+            temp = delta_in_j[j] * fp(z_in[j])
+            delta_j.append(temp)
+        delta_v = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for i in range(4):
             delta_v[i] = learning_rate * delta_j[i]
             delta_v[i + 4] = learning_rate * delta_j[i] * x[0]
             delta_v[i + 8] = learning_rate * delta_j[i] * x[1]
         # step 8
         for i in range(5):
-            w[i] += deltaW
+            w[i] += deltaW[i]
         for i in range(12):
             v[i] += delta_v[i]
-    stop_condition = check_stop_condition(w[:], v[:], test)
+    stop_condition = check_stop_condition(list(w), list(v), test)
 
 
-def use(w, v, samples):
-    count_errors = 0
-    # step 0 , 1 ,2
-    for x in samples:
-        # step 3
-        z = []
-        for i in range(4):
-            sigma = 0
-            for j in range(2):
-                index = (j + 1) * 4 + i
-                sigma += x[j] * v[index]
-            z_in_j = v[i] + sigma
-            z.append(f(z_in_j))
-        sigma = 0
-        for i in range(4):
-            index = i + 1
-            sigma += z[i] * w[index]
-        y = f(w[0] + sigma)
-        if y != x[2]:
-            count_errors += 1
-    return count_errors
+def showplot():
+    training = useforplot(list(w), list(v), train)
+    tests = useforplot(list(w), list(v), test)
+    shapes = ['o', 'x']
+    colors = ['r', 'b']
+    shapestest = ["P", "p"]
+    plt.axis([-10, 10, -10, 10])
+    for i in training:
+        plt.scatter(i[0], i[1], marker=shapes[int(i[2])], color=colors[i[3]], label="training")
+    for i in tests:
+        plt.scatter(i[0], i[1], marker=shapestest[int(i[2])], color=colors[i[3]], label="test")
+    plt.show()
+
+
+showplot()
