@@ -5,6 +5,7 @@ import numpy
 prep = 5
 CityCount = 200
 baseList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+CityList = []
 
 
 class City:
@@ -32,18 +33,19 @@ def initial():
     return result
 
 
-def fitness(anim):
-    errors = 0
-    for i in range(8):
-        for j in range(i + 1, 7):
-            if anim.genotype[i] == anim.genotype[j]:
-                errors += 1
-            if anim.genotype[i] + (j - i) == anim.genotype[j]:
-                errors += 1
-            if anim.genotype[i] - (j - i) == anim.genotype[j]:
-                errors += 1
-    fitfinal = 28 - errors
-    anim.fit = fitfinal
+def fitness(set):
+    cost = 0
+    for i in range(20):
+        if i != 19:
+            c1index = set.genotype[i]
+            c2index = set.genotype[i + 1]
+        else:
+            c1index = 19
+            c2index = 0
+        c1 = CityList[c1index]
+        c2 = CityList[c2index]
+        costc12 = costc12 + distance(c1, c2)
+    set.fit = 1 / cost
 
 
 def selection(animals):
