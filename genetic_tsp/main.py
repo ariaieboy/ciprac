@@ -8,6 +8,14 @@ CityCount = 200
 baseList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 CityList = []
 
+x = [14, 31, 61, 16, 33, 3, 50, 95, 12, 53, 89, 56, 70, 31, 72, 33, 54, 20, 80, 80]
+y = [96, 93, 45, 18, 68, 2, 96, 58, 20, 38, 71, 34, 7, 57, 32, 45, 16, 68, 26, 28]
+
+
+def make_city_list(city_list, x, y):
+    for i in range(len(x)):
+        city_list.append(City(x[i], y[i]))
+
 
 class City:
     x = 0
@@ -32,6 +40,7 @@ def initial():
         random.shuffle(baseList)
         result.append(CitySet(list(baseList)))
     return result
+
 
 
 def distance(a, b):
