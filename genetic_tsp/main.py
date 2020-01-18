@@ -42,8 +42,9 @@ def initial():
     return result
 
 
-def distance(A, B):
-    return math.sqrt(pow(A.x - B.x, 2) + pow(A.y - B.y, 2))
+
+def distance(a, b):
+    return math.sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2))
 
 
 def fitness(set):
@@ -57,7 +58,7 @@ def fitness(set):
             c2index = 0
         c1 = CityList[c1index]
         c2 = CityList[c2index]
-        costc12 = costc12 + distance(c1, c2)
+        cost = cost + distance(c1, c2)
     set.fit = 1 / cost
 
 
@@ -178,11 +179,11 @@ def stop_condition(parents):
 
 def maingenetic():
     parents = initial()
+    for i in range(CityCount):
+        fitness(parents[i])
     for i in parents:
         print(i.genotype)
     exit(0)
-    for i in range(50):
-        fitness(parents[i])
     counter = 0
     while stop_condition(parents):
         counter += 1
