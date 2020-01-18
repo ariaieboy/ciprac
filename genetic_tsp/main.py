@@ -1,10 +1,22 @@
 import random
 import operator
+import numpy
 
 prep = 5
+CityCount = 200
+baseList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
 
-class Animal:
+class City:
+    x = 0
+    y = 0
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
+class CitySet:
     def __init__(self, genotype):
         self.genotype = genotype
 
@@ -13,13 +25,11 @@ class Animal:
 
 
 def initial():
-    animals = []
-    for i in range(50):
-        temp = []
-        for j in range(8):
-            temp.append(random.randint(0, 7))
-        animals.append(Animal(list(temp)))
-    return animals
+    result = []
+    for i in range(CityCount):
+        random.shuffle(baseList)
+        result.append(CitySet(list(baseList)))
+    return result
 
 
 def fitness(anim):
@@ -153,6 +163,9 @@ def stop_condition(parents):
 
 def maingenetic():
     parents = initial()
+    for i in parents:
+        print(i.genotype)
+    exit(0)
     for i in range(50):
         fitness(parents[i])
     counter = 0
