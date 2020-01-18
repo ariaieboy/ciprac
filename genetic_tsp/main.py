@@ -42,7 +42,6 @@ def initial():
     return result
 
 
-
 def distance(a, b):
     return math.sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2))
 
@@ -62,26 +61,26 @@ def fitness(set):
     set.fit = 1 / cost
 
 
-def selection(animals):
+def selection(cities):
     sum = 0
     chanses = []
     selected = []
-    for animal in animals:
-        sum += animal.fit
-    chanses.append(round(animals[0].fit / sum, 4))
-    for i in range(1, 50):
-        chanses.append(round(animal.fit / sum + chanses[i - 1], 4))
-    for i in range(50):
-        randomnumber = round(random.uniform(0, 1), 5)
-        for j in range(50):
+    for city in cities:
+        sum += city.fit
+    chanses.append(round(cities[0].fit / sum, 6))
+    for i in range(1, CityCount):
+        chanses.append(round(cities[i].fit / sum + chanses[i - 1], 6))
+    for i in range(CityCount):
+        randomnumber = round(random.uniform(0, 1), 6)
+        for j in range(CityCount):
             if chanses[j] >= randomnumber:
                 if j == 0:
-                    selected.append(animals[j])
+                    selected.append(cities[j])
                 else:
-                    selected.append(animals[j - 1])
+                    selected.append(cities[j - 1])
                 break
-            elif 49 == j:
-                selected.append(animals[j])
+            elif CityCount - 1 == j:
+                selected.append(cities[j])
     random.shuffle(selected)
     return selected
 
@@ -178,10 +177,12 @@ def stop_condition(parents):
 
 
 def maingenetic():
+    make_city_list(CityList, x, y)
     parents = initial()
     for i in range(CityCount):
         fitness(parents[i])
-    for i in parents:
+    selected = selection(list(parents))
+    for i in selected:
         print(i.genotype)
     exit(0)
     counter = 0
