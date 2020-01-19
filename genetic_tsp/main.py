@@ -87,28 +87,44 @@ def selection(cities):
 
 def crossover(selected):
     childs = []
-    for i in range(0, 49, 2):
+    for i in range(0, 199, 2):
         split = random.randint(1, 6)
+        repeat1 = []
+        repeat2 = []
         genotype1 = []
         genotype2 = []
-        for j in range(8):
+        for j in range(20):
             if j <= split:
                 genotype1.append(selected[i].genotype[j])
                 genotype2.append(selected[i + 1].genotype[j])
             else:
                 genotype1.append(selected[i + 1].genotype[j])
                 genotype2.append(selected[i].genotype[j])
-        childs.append(Animal(genotype1))
-        childs.append(Animal(genotype2))
+        for z in range(split + 1):
+            if genotype1[split + 1:len(genotype1)].__contains__(genotype1[z]):
+                repeat1.append(genotype1[z])
+                genotype1.__delitem__(genotype1.index(genotype1[z], split + 1, len(genotype1)))
+            if genotype2[split + 1:len(genotype2)].__contains__(genotype2[z]):
+                repeat2.append(genotype2[z])
+                genotype2.__delitem__(genotype2.index(genotype2[z], split + 1, len(genotype2)))
+        genotype1.extend(repeat1)
+        genotype2.extend(repeat2)
+        childs.append(City(genotype1))
+        childs.append(City(genotype2))
     return childs
 
 
 def Mutation(childs):
-    for i in range(2):
+    for i in range(20):
         select = random.randint(0, len(childs) - 1)
-        genotypeindex = random.randint(0, 7)
-        randint = random.randint(0, 7)
+        genotypeindex = random.randint(0, 19)
+        randint = random.randint(0, 19)
+        sameindex=childs[select].genotype.index(randint)
+
+        temp=childs[select].genotype[genotypeindex]
         childs[select].genotype[genotypeindex] = randint
+        childs[select].genotype[sameindex]=temp
+
 
 
 def generational_replacement(parents, children):
@@ -198,4 +214,5 @@ def maingenetic():
     print(counter)
 
 
-maingenetic()
+# maingenetic()
+
