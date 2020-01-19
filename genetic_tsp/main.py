@@ -3,11 +3,14 @@ import operator
 import numpy
 import math
 
-prep = 5
+prep = 120
+MutationCount = 5
 CityCount = 200
+maxGeneration = 5000
+maxDontChange = 200
 baseList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 CityList = []
-
+MaxFitness = []
 x = [14, 31, 61, 16, 33, 3, 50, 95, 12, 53, 89, 56, 70, 31, 72, 33, 54, 20, 80, 80]
 y = [96, 93, 45, 18, 68, 2, 96, 58, 20, 38, 71, 34, 7, 57, 32, 45, 16, 68, 26, 28]
 
@@ -87,8 +90,8 @@ def selection(cities):
 
 def crossover(selected):
     childs = []
-    for i in range(0, 199, 2):
-        split = random.randint(1, 6)
+    for i in range(0, CityCount-1, 2):
+        split = random.randint(1, 18)
         repeat1 = []
         repeat2 = []
         genotype1 = []
@@ -107,24 +110,23 @@ def crossover(selected):
             if genotype2[split + 1:len(genotype2)].__contains__(genotype2[z]):
                 repeat2.append(genotype2[z])
                 genotype2.__delitem__(genotype2.index(genotype2[z], split + 1, len(genotype2)))
-        genotype1.extend(repeat1)
-        genotype2.extend(repeat2)
-        childs.append(City(genotype1))
-        childs.append(City(genotype2))
+        genotype1.extend(repeat2)
+        genotype2.extend(repeat1)
+
+        childs.append(CitySet(genotype1))
+        childs.append(CitySet(genotype2))
     return childs
 
 
 def Mutation(childs):
-    for i in range(20):
+    for i in range(MutationCount):
         select = random.randint(0, len(childs) - 1)
-        genotypeindex = random.randint(0, 19)
-        randint = random.randint(0, 19)
-        sameindex=childs[select].genotype.index(randint)
+        randint1 = random.randint(0, 19)
+        randint2 = random.randint(0, 19)
 
-        temp=childs[select].genotype[genotypeindex]
-        childs[select].genotype[genotypeindex] = randint
-        childs[select].genotype[sameindex]=temp
-
+        temp = childs[select].genotype[randint1]
+        childs[select].genotype[randint1] = childs[select].genotype[randint2]
+        childs[select].genotype[randint2] = temp
 
 
 def generational_replacement(parents, children):
@@ -141,34 +143,34 @@ def generational_replacement(parents, children):
     return children
 
 
-def steady_selection(animals):
+def steady_selection(cities):
     sum = 0
     chanses = []
-    is_selected = [0] * 50
+    is_selected = [0] * CityCount
     selected = []
-    for animal in animals:
-        sum += animal.fit
-    chanses.append(round(animals[0].fit / sum, 4))
-    for i in range(1, 50):
-        chanses.append(round(animal.fit / sum + chanses[i - 1], 4))
+    for city in cities:
+        sum += city.fit
+    chanses.append(round(cities[0].fit / sum, 6))
+    for i in range(1, CityCount):
+        chanses.append(round(cities[i].fit / sum + chanses[i - 1], 4))
     counter = 0
     while counter != prep:
-        randomnumber = round(random.uniform(0, 1), 5)
-        for j in range(50):
+        randomnumber = round(random.uniform(0, 1), 6)
+        for j in range(CityCount):
             if chanses[j] >= randomnumber:
                 if j == 0:
                     if is_selected[j == 0]:
-                        selected.append(animals[j])
+                        selected.append(cities[j])
                         is_selected[j] = 1
                         counter += 1
                 else:
                     if (j - 1) != 5:
-                        selected.append(animals[j - 1])
+                        selected.append(cities[j - 1])
                         is_selected[j - 1] = 1
                         counter += 1
                 break
-            elif 49 == j and is_selected[j] != 5:
-                selected.append(animals[j])
+            elif (CityCount - 1) == j and is_selected[j] != 5:
+                selected.append(cities[j])
                 is_selected[j] = 1
                 counter += 1
     return selected
@@ -183,13 +185,28 @@ def steady_replacement(parents, children):
     return parents
 
 
-def stop_condition(parents):
+def stop_condition(parents, counter):
+    if counter > maxGeneration:
+        return False
+    maxfit = -1
+    maxfitset = False
     for parent in parents:
-        if 28 == parent.fit:
-            print(parent.genotype)
-            print(parent.fit)
+        if maxfit < parent.fit:
+            maxfit = parent.fit
+            maxfitset = parent
+    print(1/maxfit)
+    MaxFitness.append(maxfitset)
+    if len(MaxFitness) > maxDontChange:
+        del MaxFitness[0]
+    if counter >= maxDontChange:
+        currentmax = MaxFitness[0].fit
+        if sum(MaxFitness[j].fit > currentmax for j in range(len(MaxFitness))) == 0:
+            print(1/MaxFitness[0].fit)
+            print(MaxFitness[0].genotype)
             return False
-    return True
+        return True
+    else:
+        return True
 
 
 def maingenetic():
@@ -197,12 +214,9 @@ def maingenetic():
     parents = initial()
     for i in range(CityCount):
         fitness(parents[i])
-    selected = selection(list(parents))
-    for i in selected:
-        print(i.genotype)
-    exit(0)
     counter = 0
-    while stop_condition(parents):
+    while stop_condition(parents, counter):
+        print(counter)
         counter += 1
         selected = selection(list(parents))
         childs = crossover(list(selected))
@@ -214,5 +228,4 @@ def maingenetic():
     print(counter)
 
 
-# maingenetic()
-
+maingenetic()
