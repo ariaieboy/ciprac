@@ -1,7 +1,7 @@
 import random
 import operator
 import numpy
-
+import math
 prep = 5
 CityCount = 200
 baseList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
@@ -31,19 +31,11 @@ def initial():
         result.append(CitySet(list(baseList)))
     return result
 
+def distance(A,B):
+    return math.sqrt(pow(A.x - B.x,2)+pow(A.y - B.y,2))
 
 def fitness(anim):
-    errors = 0
-    for i in range(8):
-        for j in range(i + 1, 7):
-            if anim.genotype[i] == anim.genotype[j]:
-                errors += 1
-            if anim.genotype[i] + (j - i) == anim.genotype[j]:
-                errors += 1
-            if anim.genotype[i] - (j - i) == anim.genotype[j]:
-                errors += 1
-    fitfinal = 28 - errors
-    anim.fit = fitfinal
+
 
 
 def selection(animals):
